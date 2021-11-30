@@ -1,0 +1,23 @@
+﻿
+@{
+    ViewBag.Title = "areaReportes";
+}
+
+<h2>Área de reportes</h2>
+
+@using (Html.BeginForm("redirigir", "Reporteria", FormMethod.Post))
+{
+    <div class="container">
+        <div class="form-group row">
+            @Html.Label("Seleccione que reporte quiere visualizar", htmlAttributes: new { @class = "form-label mt-2 row" })
+            @Html.DropDownList("Reportes", (List<SelectListItem>)ViewBag.reportes, "Seleccione un reporte", htmlAttributes: new { @class = "form-select"})
+            <div  class="container mt-3 col-xs-1" align="center">
+                <div class="form-group">
+                    <button type="submit" class="btn btn-block btn-success col-md-1" align="center">Seleccionar</button>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+    
+}
