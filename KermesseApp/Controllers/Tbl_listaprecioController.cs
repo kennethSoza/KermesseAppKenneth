@@ -263,7 +263,7 @@ namespace KermesseApp.Controllers
 
         }
 
-        public ActionResult VerRptListaPrecio(String tipo)
+        public ActionResult VerRptListaPrecio(String tipo, String cadena)
         {
             LocalReport lrpt = new LocalReport();
             string mt, enc, f;
@@ -272,39 +272,24 @@ namespace KermesseApp.Controllers
 
             string ruta = Path.Combine(Server.MapPath("~/Reportes"), "rptListaPrecio.rdlc");
             lrpt.ReportPath = ruta;
+            ReportDataSource rd = null;
 
-            List<vw_listaprecio> lista = new List<vw_listaprecio>();
-            lista = db.vw_listaprecio.Where(x => x.estado != 3).ToList(); ;
-
-            ReportDataSource rds = new ReportDataSource("dsListaPrecio", lista);
-            lrpt.DataSources.Add(rds);
-
+            if (String.IsNullOrEmpty(cadena))
+            {
+                var listFiltrada = db.vw_listaprecio.Where(x => x.estado != 3);
+                rd = new ReportDataSource("dsListaPrecio", listFiltrada);
+            }
+            else
+            {
+                var listFiltrada = db.vw_listaprecio.Where(x => x.estado != 3 && (x.lista_precio.Contains(cadena) || x.descripcion.Contains(cadena))); ;
+                rd = new ReportDataSource("dsListaPrecio", listFiltrada);
+            }
+            lrpt.DataSources.Add(rd);
             var b = lrpt.Render(tipo, null, out mt, out enc, out f, out s, out w);
             return new FileContentResult(b, mt);
         }
 
-
-        public ActionResult VerRptListaPrecio2(String tipo, String cadena)
-        {
-            LocalReport lrpt = new LocalReport();
-            string mt, enc, f;
-            String[] s;
-            Warning[] w;
-
-            string ruta = Path.Combine(Server.MapPath("~/Reportes"), "rptListaPrecio.rdlc");
-            lrpt.ReportPath = ruta;
-
-            //List<tbl_cat_producto> lista = new List<tbl_cat_producto>();
-            var listaFiltrada = db.vw_listaprecio.Where(x => x.lista_precio.Contains(cadena) || x.descripcion.Contains(cadena) && x.estado != 3);
-
-            ReportDataSource rds = new ReportDataSource("dsListaPrecio", listaFiltrada);
-            lrpt.DataSources.Add(rds);
-
-            var b = lrpt.Render(tipo, null, out mt, out enc, out f, out s, out w);
-            return new FileContentResult(b, mt);
-        }
-
-        public ActionResult VerRptListaPrecioDet(String tipo, String idlistaprecio)
+        public ActionResult VerRptListaPrecioDet(String tipo, String cadena, String idlistaprecio)
         {
             LocalReport lrpt = new LocalReport();
             string mt, enc, f;
@@ -314,37 +299,22 @@ namespace KermesseApp.Controllers
             string ruta = Path.Combine(Server.MapPath("~/Reportes"), "rptListaPrecioDet.rdlc");
             lrpt.ReportPath = ruta;
 
-            List<vw_listaprecio_det> lista = new List<vw_listaprecio_det>();
-            lista = db.vw_listaprecio_det.Where(x => x.id_listaprecio == id).ToList(); ;
+            ReportDataSource rd = null;
+            if (String.IsNullOrEmpty(cadena))
+            {
+                var listaFiltrada = db.vw_listaprecio_det.Where(x => x.id_listaprecio == id).ToList(); ;
+                rd = new ReportDataSource("dsRptListaPrecioDet", listaFiltrada);
+            }
+            else
+            {
+                var listaFiltrada = db.vw_listaprecio_det.Where(x => x.listaprecio.Contains(cadena) || x.producto.Contains(cadena) && x.id_listaprecio == id);
+                rd = new ReportDataSource("dsRptListaPrecioDet", listaFiltrada);
+            }
 
-            ReportDataSource rds = new ReportDataSource("dsRptListaPrecioDet", lista);
-            lrpt.DataSources.Add(rds);
-
+            lrpt.DataSources.Add(rd);
             var b = lrpt.Render(tipo, null, out mt, out enc, out f, out s, out w);
             return new FileContentResult(b, mt);
-        }
 
-
-        public ActionResult VerRptListaPrecioDet2(String tipo, String cadena, String idlistaprecio)
-        {
-            LocalReport lrpt = new LocalReport();
-            string mt, enc, f;
-            String[] s;
-            Warning[] w;
-            int id = Int32.Parse(idlistaprecio);
-            Console.WriteLine(idlistaprecio);
-            Console.WriteLine(id);
-            string ruta = Path.Combine(Server.MapPath("~/Reportes"), "rptListaPrecioDet.rdlc");
-            lrpt.ReportPath = ruta;
-
-            //List<tbl_cat_producto> lista = new List<tbl_cat_producto>();
-            var listaFiltrada = db.vw_listaprecio_det.Where(x => x.listaprecio.Contains(cadena) || x.producto.Contains(cadena) && x.id_listaprecio == id);
-
-            ReportDataSource rds = new ReportDataSource("dsRptListaPrecioDet", listaFiltrada);
-            lrpt.DataSources.Add(rds);
-
-            var b = lrpt.Render(tipo, null, out mt, out enc, out f, out s, out w);
-            return new FileContentResult(b, mt);
         }
 
         public ActionResult VistaRptListaPrecio()

@@ -144,7 +144,7 @@ namespace KermesseApp.Controllers
         }
 
 
-        public ActionResult VerRptProductos(String tipo)
+        public ActionResult VerRptProductos(String tipo, string cadena)
         {
             LocalReport lrpt = new LocalReport();
             string mt, enc, f;
@@ -154,35 +154,22 @@ namespace KermesseApp.Controllers
             string ruta = Path.Combine(Server.MapPath("~/Reportes"), "rptProducto.rdlc");
             lrpt.ReportPath = ruta;
 
-            List<view_productos> lista = new List<view_productos>();
-            lista = db.view_productos.Where(x => x.estado != 3).ToList(); ;
+            ReportDataSource rd = null;
 
-            ReportDataSource rds = new ReportDataSource("dsRptProducto", lista);
-            lrpt.DataSources.Add(rds);
-
+            if (String.IsNullOrEmpty(cadena))
+            {
+                var listFiltrada = db.view_productos.Where(x => x.estado != 3);
+                rd = new ReportDataSource("dsRptProducto", listFiltrada);
+            }
+            else
+            {
+                var listFiltrada = db.view_productos.Where(x => x.estado != 3 && (x.producto.Contains(cadena) || x.desc_presentacion.Contains(cadena))); ;
+                rd = new ReportDataSource("dsRptProducto", listFiltrada);
+            }
+            lrpt.DataSources.Add(rd);
             var b = lrpt.Render(tipo, null, out mt, out enc, out f, out s, out w);
             return new FileContentResult(b, mt);
-        }
 
-
-        public ActionResult VerRptProductos2(String tipo, string cadena)
-        {
-            LocalReport lrpt = new LocalReport();
-            string mt, enc, f;
-            String[] s;
-            Warning[] w;
-
-            string ruta = Path.Combine(Server.MapPath("~/Reportes"), "rptProducto.rdlc");
-            lrpt.ReportPath = ruta;
-
-            //List<tbl_cat_producto> lista = new List<tbl_cat_producto>();
-            var listaFiltrada = db.view_productos.Where(x => x.producto.Contains(cadena) || x.desc_presentacion.Contains(cadena) && x.estado != 3);
-
-            ReportDataSource rds = new ReportDataSource("dsRptProducto", listaFiltrada);
-            lrpt.DataSources.Add(rds);
-
-            var b = lrpt.Render(tipo, null, out mt, out enc, out f, out s, out w);
-            return new FileContentResult(b, mt);
         }
     }
 }
